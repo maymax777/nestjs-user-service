@@ -19,9 +19,21 @@ export class UsersService {
     }
   }
 
-  async findAll() {
-    const users = await this.prisma.user.findMany();
-    return users;
+  async findAll(cursor: number, limit: number) {
+    try {
+      const total = await this.prisma.user.count();
+      const users = await this.prisma.user.findMany({
+        where: {
+          id: {
+            gte: cursor,
+          },
+        },
+        take: limit,
+      });
+      return { users, total };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findOne(userId: number) {

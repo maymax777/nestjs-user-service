@@ -20,6 +20,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { utils } from './users.utils';
 import Response from 'src/common/dto/response.dto';
 import { User } from './entities/user.entity';
+import { QueryCursor, QueryLimit } from './decorators/query.decorator';
+import { PaginatedUserResponse } from './users.interface';
 
 @ApiTags('Users')
 @Controller('users')
@@ -128,11 +130,19 @@ export class UsersController {
   @Get(utils.findAll.path)
   @ApiOperation(utils.findAll.operation)
   @ApiResponse(utils.findAll.response200)
-  async findAll(): Promise<Response<User[]>> {
+  async findAll(
+    @QueryCursor() cursor?: number,
+    @QueryLimit() limit?: number,
+  ): Promise<Response<PaginatedUserResponse>> {
     try {
-      const users = await this.usersService.findAll();
+      const { users, total } = await this.usersService.findAll(cursor, limit);
       return {
-        data: users,
+        data: {
+          users,
+          total,
+          cursor,
+          limit,
+        },
         message: 'Users retrieved successfully',
         success: true,
         error: null,
