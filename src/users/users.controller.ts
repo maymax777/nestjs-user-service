@@ -6,11 +6,14 @@ import {
   Patch,
   Param,
   Delete,
+  NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import {
   ApiBody,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -36,6 +39,7 @@ export class UsersController {
   async findOne(@Param('id') id: string): Promise<Response<User>> {
     try {
       const user = await this.usersService.findOne(+id);
+
       return {
         data: user,
         message: 'Found user successfully',
@@ -43,12 +47,12 @@ export class UsersController {
         error: null,
       };
     } catch (error) {
-      return {
+      throw new NotFoundException({
         data: null,
         message: 'Failed to retrieve users',
         success: false,
         error: error.message || 'Internal Server Error',
-      };
+      });
     }
   }
 
@@ -71,12 +75,12 @@ export class UsersController {
         error: null,
       };
     } catch (error) {
-      return {
+      throw new InternalServerErrorException({
         data: null,
         message: 'Failed to update user',
         success: false,
         error: error.message || 'Internal Server Error',
-      };
+      });
     }
   }
 
@@ -95,12 +99,12 @@ export class UsersController {
         error: null,
       };
     } catch (error) {
-      return {
+      throw new InternalServerErrorException({
         data: null,
         message: 'Failed to remove user',
         success: false,
         error: error.message || 'Internal Server Error',
-      };
+      });
     }
   }
 
@@ -118,18 +122,20 @@ export class UsersController {
         error: null,
       };
     } catch (error) {
-      return {
+      throw new InternalServerErrorException({
         data: null,
         message: 'Failed to create user',
         success: false,
         error: error.message || 'Internal Server Error',
-      };
+      });
     }
   }
 
   @Get(utils.findAll.path)
   @ApiOperation(utils.findAll.operation)
   @ApiResponse(utils.findAll.response200)
+  @ApiQuery({ name: 'cursor', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   async findAll(
     @QueryCursor() cursor?: number,
     @QueryLimit() limit?: number,
@@ -148,12 +154,12 @@ export class UsersController {
         error: null,
       };
     } catch (error) {
-      return {
+      throw new InternalServerErrorException({
         data: null,
         message: 'Failed to retrieve users',
         success: false,
         error: error.message || 'Internal Server Error',
-      };
+      });
     }
   }
 }
